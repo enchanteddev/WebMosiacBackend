@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -33,8 +35,8 @@ pub struct Author{
 
 
 #[derive(Serialize)]
-pub struct JsonRawData{
-    pub posts: Vec<Post>,
-    pub comments: Vec<Comment>,
-    pub authors: Vec<Author>,
+pub struct AppData{
+    pub posts: HashMap<u32, Post>,
+    pub comments: HashMap<u32, Comment>,
+    pub authors: HashMap<u32, Author>,
 }
