@@ -1,0 +1,57 @@
+{
+    "posts": [
+        {
+            "id": 1,
+            "body": "lorem",
+            "likes": 10,
+            "dislikes": 10,
+            "author_id": 2
+        },
+        {
+            "id": 2,
+            "body": "lorem",
+            "likes": 10,
+            "dislikes": 10,
+            "author_id": 2
+        },
+        {
+            "id": 3,
+            "body": "lorem",
+            "likes": 10,
+            "dislikes": 10,
+            "author_id": 2
+        },
+        {
+            "id": 4,
+            "body": "lorem",
+            "likes": 10,
+            "dislikes": 10,
+            "author_id": 2
+        },
+        {
+            "id": 5,
+            "body": "lorem",
+            "likes": 10,
+            "dislikes": 10,
+            "author_id": 2
+        }
+    ],
+    "authors": [
+        {
+            "name": "Kaushik Rawat",
+            "id": 1
+        },
+        {
+            "name": "Random Person",
+            "id": 2
+        }
+    ],
+    "comments": [
+        {
+            "id": 1,
+            "body": "Trashest post ever lol",
+            "author_id": 2,
+            "post_id": 3
+        }
+    ]
+}

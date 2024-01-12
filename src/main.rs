@@ -51,6 +51,7 @@ async fn welcome() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    structs::load_data("./src/data.json");
     HttpServer::new(|| {
         App::new()
             .service(post)
