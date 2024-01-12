@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, web::{self, Data}, App, HttpResponse, HttpServer, Responder};
 mod structs;
 
 
@@ -19,22 +19,9 @@ async fn post() -> impl Responder {
 }
 
 #[get("/posts")]
-async fn posts() -> impl Responder {
+async fn posts(appdata: web::Data<Dummy>) -> impl Responder {
     let mut post_map: HashMap<String, Vec<structs::PostSmall>> = HashMap::new();
-    let posts = vec![
-        structs::PostSmall {
-            id: 0,
-            name: String::from("Global Warming is Bad")
-        },
-        structs::PostSmall {
-            id: 1,
-            name: String::from("What tisadw wd aw")
-        },
-        structs::PostSmall {
-            id: 2,
-            name: String::from("af ja fj jej j ejj ej ")
-        }
-    ];
+    let posts = appdata.get_ref().data.clone();
     post_map.insert(String::from("posts"), posts);
 
     HttpResponse::Ok().json(post_map)
@@ -49,11 +36,17 @@ async fn welcome() -> impl Responder {
     HttpResponse::Ok().body("<h1>Hello There.</h1>Here are the links to various API backends.<br>".to_owned() + &html_apis)
 }
 
+struct Dummy{
+    pub data: Vec<structs::PostSmall>
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    structs::load_data("./src/data.json");
-    HttpServer::new(|| {
+    let appdata = structs::load_data("./src/data.json");
+    let postsmalls = structs::get_post_smalls(appdata);
+    HttpServer::new(move || {
         App::new()
+            .app_data(Data::new(Dummy{data: postsmalls.clone()}))
             .service(post)
             .service(posts)
             .route("/", web::get().to(welcome))

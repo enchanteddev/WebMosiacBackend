@@ -13,7 +13,7 @@ pub struct Post {
     pub author_id: u32
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct PostSmall{
     pub name: String,
     pub id: u32
@@ -69,4 +69,11 @@ pub fn load_data(path: &str) -> AppData {
         authors: author_map,
         comments: comment_map
     }
+}
+
+pub fn get_post_smalls(appdata: AppData) -> Vec<PostSmall> {
+    appdata.posts.iter().map(|(_, x)| {PostSmall{
+        id: x.id,
+        name: x.name.clone()
+    }}).collect()
 }
