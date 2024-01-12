@@ -17,15 +17,11 @@ pub struct PostSmall{
 }
 
 #[derive(Serialize)]
-pub struct Posts{
-    pub posts: Vec<PostSmall>
-}
-
-#[derive(Serialize)]
 pub struct Comment{
     pub id: u32,
     pub body: String,
-    pub author_id: u32
+    pub author_id: u32,
+    pub post_id: u32
 }
 
 
@@ -33,4 +29,12 @@ pub struct Comment{
 pub struct Author{
     pub name: String,
     pub id: u32
+}
+
+
+#[derive(Serialize)]
+pub struct JsonRawData{
+    pub posts: Vec<Post>,
+    pub comments: Vec<Comment>,
+    pub authors: Vec<Author>,
 }

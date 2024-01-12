@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 mod structs;
 
@@ -18,24 +20,24 @@ async fn post() -> impl Responder {
 
 #[get("/posts")]
 async fn posts() -> impl Responder {
-    let posts = structs::Posts{
-        posts: vec![
-            structs::PostSmall {
-                id: 0,
-                name: String::from("Global Warming is Bad")
-            },
-            structs::PostSmall {
-                id: 1,
-                name: String::from("What tisadw wd aw")
-            },
-            structs::PostSmall {
-                id: 2,
-                name: String::from("af ja fj jej j ejj ej ")
-            }
-        ]
-    };
+    let mut post_map: HashMap<String, Vec<structs::PostSmall>> = HashMap::new();
+    let posts = vec![
+        structs::PostSmall {
+            id: 0,
+            name: String::from("Global Warming is Bad")
+        },
+        structs::PostSmall {
+            id: 1,
+            name: String::from("What tisadw wd aw")
+        },
+        structs::PostSmall {
+            id: 2,
+            name: String::from("af ja fj jej j ejj ej ")
+        }
+    ];
+    post_map.insert(String::from("posts"), posts);
 
-    HttpResponse::Ok().json(posts)
+    HttpResponse::Ok().json(post_map)
 }
 
 async fn welcome() -> impl Responder {
