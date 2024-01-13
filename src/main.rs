@@ -1,27 +1,37 @@
 use std::collections::HashMap;
 
-use actix_web::{get, web::{self, Data}, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, web::{self, Data, Query}, App, HttpResponse, HttpServer, Responder, HttpRequest};
 mod structs;
 
 
 #[get("/post")]
-async fn post() -> impl Responder {
-    let post = structs::Post{
-        id: 0,
-        name: String::from("Global Warming is Bad"), 
-        body: String::from("lorem iiawdja wd jawd awd awd awd awd w awadw dawd w"), 
-        likes: 12, 
-        dislikes: 2, 
-        author_id: 1 
+async fn post(req: HttpRequest, appdata: web::Data<PreProcessedAppData>) -> impl Responder {
+    let query_str = req.query_string();
+    let query_result = Query::<HashMap<String, u32>>::from_query(query_str);
+
+    let query = match query_result {
+        Ok(q) => q,
+        Err(_) => return HttpResponse::BadRequest().body("Bad query string")
     };
 
+    let post_id = match query.get("id") {
+        Some(id) => id,
+        None => return HttpResponse::BadRequest().body("'id' parameter not found")
+    };
+
+    let post_map = &appdata.get_ref().posts;
+    let post_result = post_map.get(post_id);
+    let post = match post_result {
+        Some(p) => p,
+        None => return HttpResponse::NotFound().body("Incorrect Post Id")
+    };
     HttpResponse::Ok().json(post)
 }
 
 #[get("/posts")]
-async fn posts(appdata: web::Data<Dummy>) -> impl Responder {
+async fn posts(appdata: web::Data<PreProcessedAppData>) -> impl Responder {
     let mut post_map: HashMap<String, Vec<structs::PostSmall>> = HashMap::new();
-    let posts = appdata.get_ref().data.clone();
+    let posts = appdata.get_ref().postsmalls.clone();
     post_map.insert(String::from("posts"), posts);
 
     HttpResponse::Ok().json(post_map)
@@ -36,17 +46,25 @@ async fn welcome() -> impl Responder {
     HttpResponse::Ok().body("<h1>Hello There.</h1>Here are the links to various API backends.<br>".to_owned() + &html_apis)
 }
 
-struct Dummy{
-    pub data: Vec<structs::PostSmall>
+struct PreProcessedAppData{
+    pub postsmalls: Vec<structs::PostSmall>,
+    pub posts: HashMap<u32, structs::Post>,
+    pub comments: HashMap<u32, structs::Comment>,
+    pub authors: HashMap<u32, structs::Author>
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let appdata = structs::load_data("./src/data.json");
-    let postsmalls = structs::get_post_smalls(appdata);
+    let postsmalls = structs::get_post_smalls(appdata.clone());
     HttpServer::new(move || {
         App::new()
-            .app_data(Data::new(Dummy{data: postsmalls.clone()}))
+            .app_data(Data::new(PreProcessedAppData{
+                postsmalls: postsmalls.clone(),
+                posts: appdata.posts.clone(),
+                authors: appdata.authors.clone(),
+                comments: appdata.comments.clone()
+            }))
             .service(post)
             .service(posts)
             .route("/", web::get().to(welcome))
