@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, vec};
 
 use serde::{Serialize, Deserialize};
 use serde_json;
@@ -38,7 +38,7 @@ pub struct Author{
 #[derive(Serialize, Clone)]
 pub struct AppData{
     pub posts: HashMap<u32, Post>,
-    pub comments: HashMap<u32, Comment>,
+    pub comments: HashMap<u32, Vec<Comment>>,
     pub authors: HashMap<u32, Author>
 }
 
@@ -61,8 +61,16 @@ pub fn load_data(path: &str) -> AppData {
     let author_map: HashMap<u32, Author> = json.authors.iter()
         .map(|x| {(x.id, x.clone())}).collect();
     
-    let comment_map: HashMap<u32, Comment> = json.comments.iter()
-        .map(|x| {(x.id, x.clone())}).collect();
+    // let comment_map: HashMap<u32, Comment> = json.comments.iter()
+    //     .map(|x| {(x.id, x.clone())}).collect();
+    let mut comment_map: HashMap<u32, Vec<Comment>> = HashMap::new();
+    for comment in json.comments.iter() {
+        if comment_map.contains_key(&comment.post_id){
+            comment_map.get_mut(&comment.post_id).unwrap().push(comment.to_owned());
+        } else {
+            comment_map.insert(comment.post_id, vec![comment.to_owned()]);
+        }
+    }
 
     AppData{
         posts: post_map,
