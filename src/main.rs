@@ -104,6 +104,10 @@ struct PreProcessedAppData{
 async fn main() -> std::io::Result<()> {
     let appdata = structs::load_data("./src/data.json");
     let postsmalls = structs::get_post_smalls(appdata.clone());
+
+    let host = "127.0.0.1";
+    let port = 8080;
+    println!("Starting server at: http://{}:{}", host, port);
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(PreProcessedAppData{
@@ -117,7 +121,7 @@ async fn main() -> std::io::Result<()> {
             .service(comments)
             .route("/", web::get().to(welcome))
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind((host, port))?
     .run()
     .await
 }
