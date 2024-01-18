@@ -105,7 +105,7 @@ async fn main() -> std::io::Result<()> {
     let appdata = structs::load_data("./src/data.json");
     let postsmalls = structs::get_post_smalls(appdata.clone());
 
-    let host = "127.0.0.1";
+    let host = "0.0.0.0";
     let port = 8080;
     println!("Starting server at: http://{}:{}", host, port);
     HttpServer::new(move || {
