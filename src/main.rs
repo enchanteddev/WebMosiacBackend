@@ -84,13 +84,28 @@ async fn posts(appdata: web::Data<PreProcessedAppData>) -> impl Responder {
     HttpResponse::Ok().json(post_map)
 }
 
+
+#[get("/about")]
+async fn about() -> impl Responder {
+    let about_text = " Welcome to Web Mosaic - an electrifying celebration of technology and culture! 🎉 
+This spectacular event is proudly presented by Petrichor Events, the driving force behind the vibrant and dynamic tech-cultural fest at IIT Palakkad.";
+
+    let mut about_data: HashMap<String, String> = HashMap::new();
+    about_data.insert("about".to_string(), about_text.to_string());
+    HttpResponse::Ok().json(about_data)
+}
+
 async fn welcome() -> impl Responder {
-    let apis: Vec<String> = vec!["/posts".into(), "/post".into(), "/about".into(), "/comments".into(), "/user".into()];
-    let mut html_apis: String = "".into();
-    for api in apis {
-        html_apis += &("<a href='".to_owned() + &api + "'>" + &api + "</a><br>");
-    }
-    HttpResponse::Ok().body("<h1>Hello There.</h1>Here are the links to various API backends.<br>".to_owned() + &html_apis)
+    HttpResponse::Ok().body(
+        "<h1>Hello There.</h1>
+        Here are the links to various API backends.
+        <br>
+        <p><a href='/posts'>/posts</a>: basic info about all the posts</p>
+        <p><a href='/post'>/post</a>: Takes parameter 'id', all info about the post with that id</p>
+        <p><a href='/about'>/about</a>: placeholder text for an about page. You can add more info text if you want.</p>
+        <p><a href='/author'>/author</a>: Takes parameter 'id', info about the specific author with that id</p>
+        <p><a href='/comments'>/comments</a>: Takes parameter 'post_id', info about all the comment on the post with id as 'post_id'</p>
+        ".to_owned())
 }
 
 struct PreProcessedAppData{
@@ -119,6 +134,8 @@ async fn main() -> std::io::Result<()> {
             .service(post)
             .service(posts)
             .service(comments)
+            .service(author)
+            .service(about)
             .route("/", web::get().to(welcome))
     })
     .bind((host, port))?
