@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use actix_web::{get, web::{self, Data, Query}, App, HttpResponse, HttpServer, Responder, HttpRequest};
+use actix_cors::Cors;
+use actix_web::{get, http, web::{self, Data, Query}, App, HttpResponse, HttpServer, Responder, HttpRequest};
 mod structs;
 
 
@@ -124,9 +125,19 @@ async fn main() -> std::io::Result<()> {
     let port = 8080;
     println!("Starting server at: http://{}:{}", host, port);
     HttpServer::new(move || {
+        let cors = Cors::default()
+        // .allowed_origin_fn(|origin, _req_head| {
+            //     origin.as_bytes().ends_with(b".rust-lang.org")
+            // })
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            .allowed_header(http::header::CONTENT_TYPE)
+            .allow_any_origin()
+            .max_age(3600);
+
         App::new()
-            .app_data(Data::new(PreProcessedAppData{
-                postsmalls: postsmalls.clone(),
+        .app_data(Data::new(PreProcessedAppData{
+            postsmalls: postsmalls.clone(),
                 posts: appdata.posts.clone(),
                 authors: appdata.authors.clone(),
                 comments: appdata.comments.clone()
@@ -137,7 +148,8 @@ async fn main() -> std::io::Result<()> {
             .service(author)
             .service(about)
             .route("/", web::get().to(welcome))
-    })
+            .wrap(cors)
+        })
     .bind((host, port))?
     .run()
     .await
